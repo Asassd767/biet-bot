@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>BIET Chatbot — Modern</title>
+  <style>
+    :root{
+      --bg:#f3f7ff;
+      --card:#ffffff;
+      --primary:#0b4b84; /* modern BIET-ish blue */
+      --accent:#0f6fb2;
+      --user:#dcf8c6;
+      --bot:#ffffff;
+      --muted:#6b7280;
+      --radius:14px;
+      --glass: rgba(255,255,255,0.6);
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    html,body{height:100%; margin:0; background:var(--bg); -webkit-font-smoothing:antialiased;}
+    .wrap{
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+    }
+
+    .chat-app{
+      width:100%;
+      max-width:460px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.85), var(--card));
+      border-radius:18px;
+      box-shadow:0 18px 50px rgba(11,75,132,0.12);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+    }
+
+    /* Header */
+    .header{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      padding:14px 16px;
+      background:linear-gradient(90deg,var(--primary),var(--accent));
+      color:white;
+    }
+    .logo {
+      width:44px;
+      height:44px;
+      border-radius:10px;
+      background:rgba(255,255,255,0.08);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-shrink:0;
+    }
+    .title{
+      font-weight:700;
+      font-size:16px;
+      line-height:1;
+    }
+    .subtitle{
+      font-size:12px;
+      opacity:0.9;
+    }
+
+    /* Chat area */
+    .chat-area{
+      padding:14px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      height:60vh;
+      min-height:360px;
+    }
+    .messages{
+      flex:1;
+      overflow:auto;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      padding-right:6px;
+    }
+
+    .msg{
+      max-width:82%;
+      padding:10px 12px;
+      border-radius:12px;
+      line-height:1.3;
+      box-shadow:0 4px 10px rgba(2,6,23,0.04);
+    }
+    .msg.bot{
+      background:var(--bot);
+      align-self:flex-start;
+      border-top-left-radius:4px;
+    }
+    .msg.user{
+      background:var(--user);
+      align-self:flex-end;
+      border-top-right-radius:4px;
+    }
+    .meta{
+      font-size:11px;
+      color:var(--muted);
+      margin-top:6px;
+    }
+
+    /* Quick buttons */
+    .quick{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    .quick button{
+      background:var(--glass);
+      border:1px solid rgba(11,75,132,0.06);
+      padding:8px 10px;
+      border-radius:999px;
+      font-size:13px;
+      cursor:pointer;
+    }
+
+    /* Input area */
+    .bottom{
+      padding:12px;
+      border-top:1px solid rgba(11,75,132,0.06);
+      display:flex;
+      gap:8px;
+      align-items:center;
+      background:linear-gradient(180deg, rgba(255,255,255,0.6), transparent);
+    }
+    .input{
+      flex:1;
+      display:flex;
+      gap:8px;
+      align-items:center;
+      background:#f7fbff;
+      padding:8px;
+      border-radius:999px;
+      border:1px solid rgba(11,75,132,0.06);
+    }
+    .input input{
+      flex:1;
+      border:0;
+      outline:none;
+      padding:8px;
+      font-size:14px;
+      background:transparent;
+    }
+    .icon-btn{
+      background:var(--primary);
+      color:white;
+      border:0;
+      padding:8px 12px;
+      border-radius:10px;
+      cursor:pointer;
+      font-weight:600;
+    }
+    .mic{
+      background:transparent;
+      border:1px solid rgba(11,75,132,0.12);
+      color:var(--primary);
+      padding:8px;
+      border-radius:10px;
+      cursor:pointer;
+    }
+
+    /* small screens */
+    @media (max-width:420px){
+      .chat-app{border-radius:12px;}
+      .header{padding:12px;}
+      .chat-area{padding:12px;}
+      .bottom{padding:10px;}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="chat-app" role="application" aria-label="BIET Enquiry Chatbot">
+      <div class="header">
+        <div class="logo" aria-hidden="true">
+          <!-- Minimal modern SVG logo -->
+          <svg width="36" height="36" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="2" width="44" height="44" rx="8" fill="white" opacity="0.06"/>
+            <path d="M12 32 L20 16 L28 32 Z" fill="white" opacity="0.95"/>
+            <circle cx="34" cy="14" r="5" fill="white" opacity="0.95"/>
+          </svg>
+        </div>
+        <div>
+          <div class="title">BIET Enquiry Bot</div>
+          <div class="subtitle">College info • Admissions • Placements</div>
+        </div>
+      </div>
+
+      <div class="chat-area">
+        <div class="messages" id="messages" aria-live="polite"></div>
+
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+            <strong style="font-size:13px;color:var(--muted)">Quick Questions</strong>
+            <span style="font-size:12px;color:var(--muted)">Tap to ask</span>
+          </div>
+          <div class="quick" id="quickBtns">
+            <button onclick="quick('courses')">Courses</button>
+            <button onclick="quick('admission')">Admission</button>
+            <button onclick="quick('fees')">Fees</button>
+            <button onclick="quick('placements')">Placements</button>
+            <button onclick="quick('hostel')">Hostel</button>
+            <button onclick="quick('contact')">Contact</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="bottom">
+        <div class="input" role="search">
+          <input id="userInput" type="text" placeholder="Ask about courses, admission, hostel..." aria-label="Type your question" />
+          <button id="micBtn" class="mic" title="Speak" aria-label="Start voice input">🎤</button>
+        </div>
+        <button class="icon-btn" onclick="sendMessage()" aria-label="Send message">Send</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // --- Basic bot knowledge (customize answers here) ---
+  const KB = [
+    {keys:["course","branch","courses","branches"], ans:"BIET offers BE/BTech in: CSE, CSE(AIML), CSD, CSBS, IS (Information Science), Mechanical Engineering, Chemical Engineering, and Textile Engineering."},
+    {keys:["cse","aiml","csd","csbs","information"], ans:"CSE and allied branches include CSE, CSE(AIML), CSD, CSBS and Information Science (IS)."},
+    {keys:["mechanical"], ans:"Mechanical Engineering focuses on design, manufacturing, automation, and practical labs."},
+    {keys:["chemical"], ans:"Chemical Engineering deals with industrial chemistry, process engineering and manufacturing technologies."},
+    {keys:["textile"], ans:"Textile Engineering focuses on fabric technology, textile machinery, and industry exposure."},
+    {keys:["admission","apply","how to apply"], ans:"For admissions, please visit the BIET campus or call the official admission helpline: 1800 731 973."},
+    {keys:["hostel","accommodation"], ans:"Separate hostels for boys and girls with Wi-Fi, security and good facilities."},
+    {keys:["placement","placements","recruiters"], ans:"Top recruiters include TCS, Infosys, Wipro and multiple core engineering companies. Average packages vary by branch and year."},
+    {keys:["contact","phone","call"], ans:"College Contact: 1800 731 973 — please call or visit the campus for detailed information."},
+    {keys:["fees","fee","tuition"], ans:"Fees differ by program and year. For exact fee structure, contact admissions at 1800 731 973 or visit the college office."}
+  ];
+
+  const messagesEl = document.getElementById('messages');
+  const inputEl = document.getElementById('userInput');
+
+  // helper: append message
+  function appendMessage(text, cls='bot'){
+    const p = document.createElement('div');
+    p.className = 'msg ' + cls;
+    p.innerText = text;
+    messagesEl.appendChild(p);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  // initial greeting
+  appendMessage("Hello! I'm BIET Enquiry Bot. Ask about courses, admission, hostel, placements or contact.", 'bot');
+
+  // bot logic: simple keyword matching with priority
+  function getReply(text){
+    const t = text.toLowerCase();
+    // exact bye
+    if(/\b(bye|exit|thank|thanks)\b/.test(t)){
+      return "Thank you for contacting BIET. Have a great day!";
+    }
+
+    // search KB
+    for(const item of KB){
+      for(const k of item.keys){
+        if(t.includes(k)){
+          return item.ans;
+        }
+      }
+    }
+    // fallback suggestions
+    return "Sorry, I don't have that exact info. Try: 'courses', 'admission', 'placements', 'hostel' or 'contact'.";
+  }
+
+  // send handler
+  function sendMessage(){
+    const text = inputEl.value.trim();
+    if(!text) return;
+    appendMessage(text, 'user');
+    inputEl.value = '';
+    // small delay to simulate thinking
+    setTimeout(()=> {
+      const reply = getReply(text);
+      appendMessage(reply, 'bot');
+    }, 350);
+  }
+
+  // quick buttons
+  function quick(q){
+    inputEl.value = q;
+    sendMessage();
+    inputEl.focus();
+  }
+
+  // Enter key sends
+  inputEl.addEventListener('keydown', function(e){
+    if(e.key === 'Enter') { e.preventDefault(); sendMessage(); }
+  });
+
+  // --- Voice input using Web Speech API ---
+  const micBtn = document.getElementById('micBtn');
+  let recognition = null;
+  let listening = false;
+
+  function setupSpeech(){
+    // Feature detect
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if(!SpeechRecognition){
+      micBtn.style.display = 'none';
+      return;
+    }
+    recognition = new SpeechRecognition();
+    recognition.lang = 'en-IN';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onresult = (event) => {
+      const text = event.results[0][0].transcript;
+      inputEl.value = text;
+      sendMessage();
+    };
+    recognition.onerror = (e) => {
+      console.warn('Speech error', e);
+      appendMessage("Voice input error. Please type your question.", 'bot');
+    };
+    recognition.onend = () => {
+      listening = false;
+      micBtn.innerText = '🎤';
+    };
+  }
+
+  micBtn.addEventListener('click', () => {
+    if(!recognition) return;
+    if(listening){
+      recognition.stop();
+      listening = false;
+      micBtn.innerText = '🎤';
+    } else {
+      try{
+        recognition.start();
+        listening = true;
+        micBtn.innerText = '⏺️';
+      } catch(e){
+        console.warn(e);
+      }
+    }
+  });
+
+  setupSpeech();
+
+  // Accessibility: focus input on load
+  window.addEventListener('load', ()=> inputEl.focus());
+</script>
+</body>
+</html>
